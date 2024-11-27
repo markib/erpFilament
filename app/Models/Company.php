@@ -8,6 +8,7 @@ use App\Models\Banking\BankAccount;
 use App\Models\Banking\ConnectedBankAccount;
 use App\Models\Common\Contact;
 use App\Models\Core\Department;
+use App\Models\Product\Product;
 use App\Models\Setting\Appearance;
 use App\Models\Setting\CompanyDefault;
 use App\Models\Setting\CompanyProfile;
@@ -16,6 +17,7 @@ use App\Models\Setting\Discount;
 use App\Models\Setting\DocumentDefault;
 use App\Models\Setting\Localization;
 use App\Models\Setting\Tax;
+use App\Models\Setting\Unit;
 use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -145,5 +147,15 @@ class Company extends FilamentCompaniesCompany implements HasAvatar
     public function transactions(): HasMany
     {
         return $this->hasMany(Accounting\Transaction::class, 'company_id');
+    }
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    public function units(): HasMany
+    {
+        return $this->hasMany(Unit::class);
     }
 }

@@ -14,6 +14,8 @@ class Account extends Cluster
 
     public static function getNavigationUrl(): string
     {
+        
         return static::getUrl(panel: 'user');
+        
     }
 }

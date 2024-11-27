@@ -51,7 +51,7 @@ class CompanyProfile extends Model
     protected function logoUrl(): Attribute
     {
         return Attribute::get(static function (mixed $value, array $attributes): ?string {
-            if ($attributes['logo']) {
+            if (isset($attributes['logo']) && $attributes['logo']) {
                 return Storage::disk('public')->url($attributes['logo']);
             }
 

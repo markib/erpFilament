@@ -146,23 +146,25 @@ class AccountService
             ->addSelect([
                 DB::raw("
                     COALESCE(
-                        IF(accounts.category IN ('asset', 'expense'),
-                            SUM(IF(journal_entries.type = 'debit' AND transactions.posted_at < ?, journal_entries.amount, 0)) -
-                            SUM(IF(journal_entries.type = 'credit' AND transactions.posted_at < ?, journal_entries.amount, 0)),
-                            SUM(IF(journal_entries.type = 'credit' AND transactions.posted_at < ?, journal_entries.amount, 0)) -
-                            SUM(IF(journal_entries.type = 'debit' AND transactions.posted_at < ?, journal_entries.amount, 0))
-                        ), 0
-                    ) AS starting_balance
+                         CASE
+                    WHEN accounts.category IN ('asset', 'expense') THEN
+                        SUM(CASE WHEN journal_entries.type = 'debit' AND transactions.posted_at < ? THEN journal_entries.amount ELSE 0 END) -
+                        SUM(CASE WHEN journal_entries.type = 'credit' AND transactions.posted_at < ? THEN journal_entries.amount ELSE 0 END)
+                    ELSE
+                        SUM(CASE WHEN journal_entries.type = 'credit' AND transactions.posted_at < ? THEN journal_entries.amount ELSE 0 END) -
+                        SUM(CASE WHEN journal_entries.type = 'debit' AND transactions.posted_at < ? THEN journal_entries.amount ELSE 0 END)
+                END, 0
+            ) AS starting_balance
                 "),
                 DB::raw("
                     COALESCE(SUM(
-                        IF(journal_entries.type = 'debit' AND transactions.posted_at BETWEEN ? AND ?, journal_entries.amount, 0)
-                    ), 0) AS total_debit
+                       CASE WHEN journal_entries.type = 'debit' AND transactions.posted_at BETWEEN ? AND ? THEN journal_entries.amount ELSE 0 END
+            ), 0) AS total_debit
                 "),
                 DB::raw("
                     COALESCE(SUM(
-                        IF(journal_entries.type = 'credit' AND transactions.posted_at BETWEEN ? AND ?, journal_entries.amount, 0)
-                    ), 0) AS total_credit
+                         CASE WHEN journal_entries.type = 'credit' AND transactions.posted_at BETWEEN ? AND ? THEN journal_entries.amount ELSE 0 END
+            ), 0) AS total_credit
                 "),
             ])
             ->join('journal_entries', 'journal_entries.account_id', '=', 'accounts.id')
@@ -198,30 +200,32 @@ class AccountService
             ])
             ->addSelect([
                 DB::raw("
-                    COALESCE(
-                        IF(accounts.category IN ('asset', 'expense'),
-                            SUM(IF(journal_entries.type = 'debit' AND transactions.posted_at < ?, journal_entries.amount, 0)) -
-                            SUM(IF(journal_entries.type = 'credit' AND transactions.posted_at < ?, journal_entries.amount, 0)),
-                            SUM(IF(journal_entries.type = 'credit' AND transactions.posted_at < ?, journal_entries.amount, 0)) -
-                            SUM(IF(journal_entries.type = 'debit' AND transactions.posted_at < ?, journal_entries.amount, 0))
-                        ), 0
-                    ) AS starting_balance
-                "),
+                COALESCE(
+                    CASE
+                        WHEN accounts.category IN ('asset', 'expense') THEN
+                            SUM(CASE WHEN journal_entries.type = 'debit' AND transactions.posted_at < ? THEN journal_entries.amount ELSE 0 END) -
+                            SUM(CASE WHEN journal_entries.type = 'credit' AND transactions.posted_at < ? THEN journal_entries.amount ELSE 0 END)
+                        ELSE
+                            SUM(CASE WHEN journal_entries.type = 'credit' AND transactions.posted_at < ? THEN journal_entries.amount ELSE 0 END) -
+                            SUM(CASE WHEN journal_entries.type = 'debit' AND transactions.posted_at < ? THEN journal_entries.amount ELSE 0 END)
+                    END, 0
+                ) AS starting_balance
+            "),
                 DB::raw("
-                    COALESCE(SUM(
-                        IF(journal_entries.type = 'debit' AND transactions.posted_at BETWEEN ? AND ?, journal_entries.amount, 0)
-                    ), 0) AS total_debit
-                "),
+                COALESCE(SUM(
+                    CASE WHEN journal_entries.type = 'debit' AND transactions.posted_at BETWEEN ? AND ? THEN journal_entries.amount ELSE 0 END
+                ), 0) AS total_debit
+            "),
                 DB::raw("
-                    COALESCE(SUM(
-                        IF(journal_entries.type = 'credit' AND transactions.posted_at BETWEEN ? AND ?, journal_entries.amount, 0)
-                    ), 0) AS total_credit
-                "),
+                COALESCE(SUM(
+                    CASE WHEN journal_entries.type = 'credit' AND transactions.posted_at BETWEEN ? AND ? THEN journal_entries.amount ELSE 0 END
+                ), 0) AS total_credit
+            "),
             ])
             ->join('journal_entries', 'journal_entries.account_id', '=', 'accounts.id')
             ->join('transactions', function (JoinClause $join) use ($endDate) {
                 $join->on('transactions.id', '=', 'journal_entries.transaction_id')
-                    ->where('transactions.posted_at', '<=', $endDate);
+                ->where('transactions.posted_at', '<=', $endDate);
             })
             ->whereExists(function (\Illuminate\Database\Query\Builder $subQuery) {
                 $subQuery->select(DB::raw(1))
@@ -241,6 +245,7 @@ class AccountService
 
         return $query;
     }
+
 
     public function getTotalBalanceForAllBankAccounts(string $startDate, string $endDate): Money
     {

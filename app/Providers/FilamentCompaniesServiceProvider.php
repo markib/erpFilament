@@ -26,7 +26,9 @@ use App\Filament\Company\Pages\Reports;
 use App\Filament\Company\Pages\Service\ConnectedAccount;
 use App\Filament\Company\Pages\Service\LiveCurrency;
 use App\Filament\Company\Resources\Banking\AccountResource;
+use App\Filament\Company\Resources\CategoryResource;
 use App\Filament\Company\Resources\Core\DepartmentResource;
+use App\Filament\Company\Resources\ProductResource;
 use App\Filament\Components\PanelShiftDropdown;
 use App\Filament\User\Clusters\Account;
 use App\Http\Middleware\ConfigureCurrentCompany;
@@ -36,11 +38,13 @@ use App\Models\Company;
 use App\Support\FilamentComponentConfigurator;
 use Exception;
 use Filament\Actions;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\MenuItem;
 use Filament\Navigation\NavigationBuilder;
 use Filament\Navigation\NavigationGroup;
 use Filament\Pages;
@@ -63,6 +67,7 @@ use Wallo\FilamentCompanies\Enums\Provider;
 use Wallo\FilamentCompanies\FilamentCompanies;
 use Wallo\FilamentCompanies\Pages\Auth\Login;
 use Wallo\FilamentCompanies\Pages\Auth\Register;
+
 
 class FilamentCompaniesServiceProvider extends PanelProvider
 {
@@ -113,6 +118,12 @@ class FilamentCompaniesServiceProvider extends PanelProvider
                 'primary' => Color::Indigo,
                 'gray' => Color::Gray,
             ])
+            // ->userMenuItems([
+            //     'profile' => MenuItem::make()
+            //         ->label('Profile')
+            //         ->icon('heroicon-o-user-circle')
+            //         ->url(static fn() => url(Profile::getUrl())),
+            // ])
             ->navigation(function (NavigationBuilder $builder): NavigationBuilder {
                 return $builder
                     ->items([
@@ -136,6 +147,14 @@ class FilamentCompaniesServiceProvider extends PanelProvider
                         NavigationGroup::make('HR')
                             ->icon('heroicon-o-user-group')
                             ->items(DepartmentResource::getNavigationItems()),
+                        NavigationGroup::make('Manage Products')
+                            ->localizeLabel()
+                            ->icon('heroicon-o-rectangle-stack')
+                            ->items([
+                                ...CategoryResource::getNavigationItems(),
+                                ...ProductResource::getNavigationItems(),
+                                ]
+                            ),
                         NavigationGroup::make('Services')
                             ->localizeLabel()
                             ->icon('heroicon-o-wrench-screwdriver')
@@ -208,6 +227,7 @@ class FilamentCompaniesServiceProvider extends PanelProvider
         FilamentCompanies::setUserPasswordsUsing(SetUserPassword::class);
         FilamentCompanies::handlesInvalidStateUsing(HandleInvalidState::class);
         FilamentCompanies::generatesProvidersRedirectsUsing(GenerateRedirectForProvider::class);
+    
     }
 
     /**
