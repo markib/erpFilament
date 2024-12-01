@@ -38,7 +38,7 @@ use App\Models\Company;
 use App\Support\FilamentComponentConfigurator;
 use Exception;
 use Filament\Actions;
-use Filament\Facades\Filament;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Http\Middleware\Authenticate;
@@ -47,6 +47,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\MenuItem;
 use Filament\Navigation\NavigationBuilder;
 use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
@@ -69,6 +70,7 @@ use Wallo\FilamentCompanies\Pages\Auth\Login;
 use Wallo\FilamentCompanies\Pages\Auth\Register;
 
 
+
 class FilamentCompaniesServiceProvider extends PanelProvider
 {
     /**
@@ -76,6 +78,7 @@ class FilamentCompaniesServiceProvider extends PanelProvider
      */
     public function panel(Panel $panel): Panel
     {
+        
         return $panel
             ->default()
             ->id('company')
@@ -113,6 +116,7 @@ class FilamentCompaniesServiceProvider extends PanelProvider
                         return $builder
                             ->items(Account::getNavigationItems());
                     }),
+            FilamentShieldPlugin::make(),
             )
             ->colors([
                 'primary' => Color::Indigo,
@@ -125,11 +129,13 @@ class FilamentCompaniesServiceProvider extends PanelProvider
             //         ->url(static fn() => url(Profile::getUrl())),
             // ])
             ->navigation(function (NavigationBuilder $builder): NavigationBuilder {
+           
                 return $builder
                     ->items([
                         ...Dashboard::getNavigationItems(),
                         ...Reports::getNavigationItems(),
                         ...Settings::getNavigationItems(),
+
                     ])
                     ->groups([
                         NavigationGroup::make('Accounting')
@@ -162,11 +168,27 @@ class FilamentCompaniesServiceProvider extends PanelProvider
                                 ...ConnectedAccount::getNavigationItems(),
                                 ...LiveCurrency::getNavigationItems(),
                             ]),
+
+                NavigationGroup::make('Roles & Permissions') // Parent Group Menu
+                ->icon('heroicon-o-lock-closed') // Add an icon for the group
+                ->items([ // Define the items within the group
+                    NavigationItem::make('List Roles')
+                    ->url(route('filament.company.resources.shield.roles.index', [
+                        'tenant' => auth()->user()->currentCompany->id ?? 1,
+                    ])),
+                        // ->icon('heroicon-o-list-bullet'),
+
+                    NavigationItem::make('Create Role')
+                    ->url(route('filament.company.resources.shield.roles.create', [
+                        'tenant' => auth()->user()->currentCompany->id ?? 1,
+                    ])),
+                        // ->icon('heroicon-o-plus'),
+                ])
                     ]);
             })
             ->viteTheme('resources/css/filament/company/theme.css')
             ->brandLogo(static fn () => view('components.icons.logo'))
-            ->tenant(Company::class)
+            ->tenant(Company::class, ownershipRelationship: 'company')
             ->tenantProfile(ManageCompany::class)
             ->tenantRegistration(CreateCompany::class)
             ->discoverResources(in: app_path('Filament/Company/Resources'), for: 'App\\Filament\\Company\\Resources')
@@ -180,6 +202,7 @@ class FilamentCompaniesServiceProvider extends PanelProvider
             ->widgets([
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
+                
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -194,7 +217,10 @@ class FilamentCompaniesServiceProvider extends PanelProvider
             ])
             ->tenantMiddleware([
                 ConfigureCurrentCompany::class,
+            \BezhanSalleh\FilamentShield\Middleware\SyncShieldTenant::class,
             ], isPersistent: true)
+            ->plugins([FilamentShieldPlugin::make(),
+            ])
             ->authMiddleware([
                 Authenticate::class,
             ]);
@@ -207,6 +233,7 @@ class FilamentCompaniesServiceProvider extends PanelProvider
     {
         $this->configurePermissions();
         $this->configureDefaults();
+        
 
         FilamentCompanies::createUsersUsing(CreateNewUser::class);
         FilamentCompanies::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
@@ -227,6 +254,13 @@ class FilamentCompaniesServiceProvider extends PanelProvider
         FilamentCompanies::setUserPasswordsUsing(SetUserPassword::class);
         FilamentCompanies::handlesInvalidStateUsing(HandleInvalidState::class);
         FilamentCompanies::generatesProvidersRedirectsUsing(GenerateRedirectForProvider::class);
+
+        // app(Panel::class)
+        //     ->id('company') // Add a unique ID for the panel
+        //     ->path('company') // Define the path (URL segment) for the panel
+        //     ->plugins([
+        //         FilamentShieldPlugin::make(),
+        //     ]);
     
     }
 
@@ -249,6 +283,10 @@ class FilamentCompaniesServiceProvider extends PanelProvider
             'create',
             'update',
         ])->description('Editor users have the ability to read, create, and update.');
+
+        FilamentCompanies::role('viewer', 'Viewer', [
+            'read',
+        ])->description('Viewer users can only read data.');
     }
 
     /**
@@ -287,4 +325,6 @@ class FilamentCompaniesServiceProvider extends PanelProvider
 
         return in_array('required', $rules, true);
     }
+
+  
 }

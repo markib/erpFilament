@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Components\PanelShiftDropdown;
 use App\Filament\User\Clusters\Account;
 use App\Http\Middleware\Authenticate;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Exception;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -77,6 +78,24 @@ class UserPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
+            // ->plugins([
+            //     FilamentShieldPlugin::make()
+            //         ->gridColumns([
+            //             'default' => 1,
+            //             'sm' => 2,
+            //             'lg' => 3
+            //         ])
+            //         ->sectionColumnSpan(1)
+            //         ->checkboxListColumns([
+            //             'default' => 1,
+            //             'sm' => 2,
+            //             'lg' => 4,
+            //         ])
+            //         ->resourceCheckboxListColumns([
+            //             'default' => 1,
+            //             'sm' => 2,
+            //         ])
+            // ])
             ->authMiddleware([
                 Authenticate::class,
             ]);

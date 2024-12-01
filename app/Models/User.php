@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Core\Department;
+use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasDefaultTenant;
@@ -10,11 +11,14 @@ use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 use Wallo\FilamentCompanies\HasCompanies;
 use Wallo\FilamentCompanies\HasConnectedAccounts;
 use Wallo\FilamentCompanies\HasProfilePhoto;
@@ -29,6 +33,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
     use HasProfilePhoto;
     use Notifiable;
     use SetsProfilePhotoFromUrl;
+    use HasRoles;
+    // use HasPanelShield;
 
     /**
      * The attributes that are mass assignable.
@@ -112,5 +118,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
         session(['current_company_id' => $company->id]);
 
         return true;
+    }
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'role_user'); // Adjust pivot table name if different
+    }
+
+    public function currentCompany(): BelongsTo
+    {
+        return $this->belongsTo(Company::class); // Assuming a user belongs to a company
     }
 }

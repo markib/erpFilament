@@ -120,12 +120,13 @@ class AccountService
                 'journal_entries.transaction_id',
                 'journal_entries.type',
                 'journal_entries.amount',
-                DB::raw('journal_entries.amount * IF(journal_entries.type = "debit", 1, -1) AS signed_amount')
+                DB::raw('journal_entries.amount * CASE WHEN journal_entries.type = \'debit\' THEN 1 ELSE -1 END AS signed_amount')
             )
                 ->whereBetween('transactions.posted_at', [$startDate, $endDate])
                 ->join('transactions', 'transactions.id', '=', 'journal_entries.transaction_id')
                 ->orderBy('transactions.posted_at')
                 ->with('transaction:id,type,description,posted_at');
+
         };
     }
 
@@ -263,18 +264,18 @@ class AccountService
                     ->where('transactions.posted_at', '<=', $endDate);
             })
             ->whereIn('journal_entries.account_id', $accountIds)
-            ->selectRaw('
+            ->selectRaw("
             SUM(CASE
-                WHEN transactions.posted_at < ? AND journal_entries.type = "debit" THEN journal_entries.amount
-                WHEN transactions.posted_at < ? AND journal_entries.type = "credit" THEN -journal_entries.amount
+                WHEN transactions.posted_at < ? AND journal_entries.type = 'debit' THEN journal_entries.amount
+                WHEN transactions.posted_at < ? AND journal_entries.type = 'credit' THEN -journal_entries.amount
                 ELSE 0
             END) AS totalStartingBalance,
             SUM(CASE
-                WHEN transactions.posted_at BETWEEN ? AND ? AND journal_entries.type = "debit" THEN journal_entries.amount
-                WHEN transactions.posted_at BETWEEN ? AND ? AND journal_entries.type = "credit" THEN -journal_entries.amount
+                WHEN transactions.posted_at BETWEEN ? AND ? AND journal_entries.type = 'debit' THEN journal_entries.amount
+                WHEN transactions.posted_at BETWEEN ? AND ? AND journal_entries.type = 'credit' THEN -journal_entries.amount
                 ELSE 0
             END) AS totalNetMovement
-        ', [
+        ", [
                 $startDate,
                 $startDate,
                 $startDate,
@@ -305,13 +306,13 @@ class AccountService
                     ->where('transactions.posted_at', '<', $startDate);
             })
             ->whereIn('journal_entries.account_id', $accountIds)
-            ->selectRaw('
+            ->selectRaw("
             SUM(CASE
-                WHEN transactions.posted_at < ? AND journal_entries.type = "debit" THEN journal_entries.amount
-                WHEN transactions.posted_at < ? AND journal_entries.type = "credit" THEN -journal_entries.amount
+                WHEN transactions.posted_at < ? AND journal_entries.type = 'debit' THEN journal_entries.amount
+                WHEN transactions.posted_at < ? AND journal_entries.type = 'credit' THEN -journal_entries.amount
                 ELSE 0
             END) AS totalStartingBalance
-        ', [
+        ", [
                 $startDate,
                 $startDate,
             ])

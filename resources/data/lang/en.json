@@ -192,5 +192,12 @@
     "Ending Balance": "Ending Balance",
     "Accountings": "Accountings",
     "Product Name": "Product Name",
-    "Manage Products": "Manage Products"
+    "Manage Products": "Manage Products",
+    "resources": "resources",
+    "Categories": "Categories",
+    "Role": "Role",
+    "Unit": "Unit",
+    "pages": "pages",
+    "widgets": "widgets",
+    "custom": "custom"
 }

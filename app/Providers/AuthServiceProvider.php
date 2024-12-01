@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Models\Banking;
+use App\Models\Role;
 use App\Models\Setting;
 use App\Policies\DefaultEnabledRecordPolicy;
+use App\Policies\RolePolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -16,7 +18,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        //
+        Role::class => RolePolicy::class,
     ];
 
     /**

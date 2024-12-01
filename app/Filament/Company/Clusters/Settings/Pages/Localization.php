@@ -47,7 +47,7 @@ class Localization extends Page
 
     public ?array $data = [];
 
-    #[Locked]
+    // #[Locked]
     public ?LocalizationModel $record = null;
 
     public function getTitle(): string | Htmlable
@@ -67,10 +67,10 @@ class Localization extends Page
 
     public function mount(): void
     {
+    
         $this->record = LocalizationModel::firstOrNew([
             'company_id' => auth()->user()->currentCompany->id,
         ]);
-
         abort_unless(static::canView($this->record), 404);
 
         $this->fillForm();
