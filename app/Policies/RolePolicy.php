@@ -16,8 +16,9 @@ class RolePolicy
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        
         $user = auth()->user();
+       
         $user->load('roles.permissions');  // Ensure roles and permissions are loaded
         $tenantId = (int)request()->route('tenant');
         $company_id = $user->currentCompany->id;

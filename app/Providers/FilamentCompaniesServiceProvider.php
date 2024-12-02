@@ -153,14 +153,38 @@ class FilamentCompaniesServiceProvider extends PanelProvider
                         NavigationGroup::make('HR')
                             ->icon('heroicon-o-user-group')
                             ->items(DepartmentResource::getNavigationItems()),
-                        NavigationGroup::make('Manage Products')
-                            ->localizeLabel()
-                            ->icon('heroicon-o-rectangle-stack')
-                            ->items([
-                                ...CategoryResource::getNavigationItems(),
-                                ...ProductResource::getNavigationItems(),
-                                ]
-                            ),
+                NavigationGroup::make('Manage Products')
+
+                    ->localizeLabel()
+
+                    ->icon('heroicon-o-rectangle-stack')
+
+                    ->items([
+
+                        // Only define items that should be visible based on their authorization logic
+
+                        NavigationItem::make('Categories')
+
+                    ->url(route(
+                        'filament.company.resources.categories.index',
+                        ['tenant' => auth()->user()->currentCompany->id]
+                    ))
+
+                            ->visible(fn() => auth()->user()->hasRole('admin') ), // Visible to admin and product manager
+
+                        NavigationItem::make('Products')
+                    ->url(route(
+                        'filament.company.resources.products.index',
+                        ['tenant' => auth()->user()->currentCompany->id]
+                    ))
+
+                            ->visible(fn() => auth()->user()->hasRole('admin') ), // Same visibility
+
+                    ]),
+
+                  
+
+
                         NavigationGroup::make('Services')
                             ->localizeLabel()
                             ->icon('heroicon-o-wrench-screwdriver')

@@ -46,6 +46,7 @@ class RoleResource extends Resource implements HasShieldPermissions
     {
         
         $user = auth()->user();
+      
         $user->load('roles.permissions');  // Ensure roles and permissions are loaded
 
         $tenantId = (int)request()->route('tenant');

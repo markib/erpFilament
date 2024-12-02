@@ -40,8 +40,10 @@ class RolesResource extends Resource implements HasShieldPermissions
     }
     public static function canViewAny(): bool
     {
-        return true;
+        // return true;
         $user = auth()->user();
+        $user->hasRole('editor');
+        dd($user);
         $user->load('roles.permissions');  // Ensure roles and permissions are loaded
 
         $tenantId = request()->route('tenant');
