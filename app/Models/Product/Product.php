@@ -18,7 +18,7 @@ class Product extends Model
 {
     use Blamable;
     use CompanyOwned;
-    use HasDefault;
+    // use HasDefault;
     use HasFactory;
     use SyncsWithCompanyDefaults;
 
@@ -28,9 +28,16 @@ class Product extends Model
         'company_id',
         'category_id',
         'product_name',
+        'product_code',
         'product_price',
         'product_quantity',
+        'product_alert_quantity',
+        'product_unit',
+        'prduct_order_tax',
+        'product_tax_type',
         'product_stock_alert',
+        'product_barcode_symbology',
+        'prduct_note',
         'enabled',
         'created_by',
         'updated_by',

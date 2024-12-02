@@ -19,6 +19,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Log;
 
 class ProductResource extends Resource
 {
@@ -41,7 +42,7 @@ class ProductResource extends Resource
 
             Forms\Components\TextInput::make('product_code')
                 ->label('Product Code')
-                ->unique()
+                ->unique(ignorable: fn($record) => $record)
                 ->nullable(),
 
             Forms\Components\Select::make('category_id')
@@ -99,11 +100,13 @@ class ProductResource extends Resource
                 ->options(['Exclusive', 'Inclusive']),
             Forms\Components\Textarea::make('product_note')
                 ->label('Note')
-                ->maxLength(65535),Toggle::make('enabled')
+                ->maxLength(65535),
+            Toggle::make('enabled')
                 ->label('Enabled')
                 ->onColor('success')
                 ->offColor('danger')
-                ->inline(false), // Optional: Displays toggle inline with label
+                ->inline(false),
+                // ->default(true),
             ]);
     }
 
@@ -133,15 +136,10 @@ class ProductResource extends Resource
                 ->label('Enable')
                 ->icon('heroicon-o-check-circle')
             ->action(function ($record) {
-                // Disable all other rows
-                // $record->getConnection()
-                //     ->table($record->getTable())
-                //     ->where('id', '!=', $record->id)
-                //     ->update(['enabled' => 0]);
                 // Explicitly target only this row
-                Product::where('id', $record->id)->update(['enabled' => 1]);
+                // Product::where('id', $record->id)->update(['enabled' => 1]);
                 // Enable the current row
-                // $record->update(['enabled' => 1]);
+                $record->update(['enabled' => 1]);
                 
             })
                 ->color('success')
@@ -179,4 +177,29 @@ class ProductResource extends Resource
             'edit' => Pages\EditProduct::route('/{record}/edit'),
         ];
     }
+
+    /**
+     * Mutate form data before save (for both create and update operations)
+     */
+    // protected static function mutateFormDataBeforeSave(array $data): array
+    // {
+    //     Log::info('Data before saving: ', $data);
+
+    //     // Set 'enabled' field to true only if not set
+    //     if (!isset($data['enabled'])) {
+    //         $data['enabled'] = true;  // Default value for 'enabled' field
+    //     }
+    //     Log::info('Saving new product with data:', $data);
+    //     return $data;
+    // }
+
+    // protected  static function mutateFormDataBeforeCreate(array $data): array
+    // {
+    //     dd($data);
+    //     // Ensure 'enabled' only applies to the new record
+    //     $data['enabled'] = $data['enabled'] ?? true;
+
+    //     Log::info('Creating new product with data:', $data);
+    //     return $data;
+    // }
 }
