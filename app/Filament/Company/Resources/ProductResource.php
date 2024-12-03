@@ -116,43 +116,70 @@ class ProductResource extends Resource
             ->columns([
             Tables\Columns\TextColumn::make('product_name')
                 ->localizeLabel()
+                ->label('Porduct Name')
+            
                 ->weight('semibold')
                 ->searchable()
                 ->sortable(),
-            IconColumn::make('enabled')
-                ->label(__('Enabled')) // Localize label
-                ->boolean() // Renders a green check or red cross by default
-                ->trueIcon('heroicon-o-check-circle') // Green tick
-                ->falseIcon('heroicon-o-x-circle') // Red cross
-                ->trueColor('success') // Green color
-                ->falseColor('danger') // Red color
-                ->sortable()
+            Tables\Columns\TextColumn::make('product_code')
+            ->localizeLabel()
+                ->label('Product Code')
+                
+                ->weight('semibold')
+                ->searchable()
+                ->sortable(),
+            Tables\Columns\TextColumn::make('category.category_name')
+            ->localizeLabel()
+                ->label('Category')
+                ->weight('semibold')
+                ->searchable()
+                ->sortable(),
+            Tables\Columns\TextColumn::make('product_price')
+            ->localizeLabel()
+            ->label('Price')
+            
+                ->weight('semibold')
+                ->searchable()
+                ->sortable(),
+            Tables\Columns\TextColumn::make('product_stock_alert')
+            ->localizeLabel()
+            ->label('Stock Alert')
+                ->weight('semibold')
+                ->sortable(),
+            Tables\Columns\IconColumn::make('enabled')
+    ->label('Status')
+    
+    ->boolean() // Automatically handles displaying a check/cross icon
+    ->action(fn($record) => $record->update(['enabled' => !$record->enabled])) // Toggle action
+    ->color(fn($state) => $state ? 'success' : 'danger') // Change color based on state
+    // ->tooltip(fn($state) => $state ? 'Click to disable' : 'Click to enable') // Tooltip for clarity
             ])
+          
             ->filters([
                 //
             ])
             ->actions([
-            ActionsAction::make('enable')
-                ->label('Enable')
-                ->icon('heroicon-o-check-circle')
-            ->action(function ($record) {
-                // Explicitly target only this row
-                // Product::where('id', $record->id)->update(['enabled' => 1]);
-                // Enable the current row
-                $record->update(['enabled' => 1]);
+            // ActionsAction::make('enable')
+            //     ->label('Enable')
+            //     ->icon('heroicon-o-check-circle')
+            // ->action(function ($record) {
+            //     // Explicitly target only this row
+            //     // Product::where('id', $record->id)->update(['enabled' => 1]);
+            //     // Enable the current row
+            //     $record->update(['enabled' => 1]);
                 
-            })
-                ->color('success')
-                ->visible(fn($record) => !$record->enabled), // Show only if disabled
+            // })
+            //     ->color('success')
+            //     ->visible(fn($record) => !$record->enabled), // Show only if disabled
 
-            ActionsAction::make('disable')
-                ->label('Disable')
-                ->icon('heroicon-o-x-circle')
-                ->action(fn($record) => $record->update(['enabled' => 0]))
-                ->color('danger')
-                ->visible(fn($record) => $record->enabled), // Show only if enabled
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            // ActionsAction::make('disable')
+            //     ->label('Disable')
+            //     ->icon('heroicon-o-x-circle')
+            //     ->action(fn($record) => $record->update(['enabled' => 0]))
+            //     ->color('danger')
+            //     ->visible(fn($record) => $record->enabled), // Show only if enabled
+                // Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()->label(''),
                 
             ])
             ->bulkActions([

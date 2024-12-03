@@ -4,6 +4,7 @@ namespace App\Filament\Company\Resources\ProductResource\Pages;
 
 use App\Filament\Company\Resources\ProductResource;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Log;
 
@@ -21,6 +22,16 @@ class EditProduct extends EditRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+    protected function getSavedNotification(): ?Notification
+    {
+            
+        return Notification::make()
+        ->success()
+        ->title('Product updated')
+        ->body('The product has been saved successfully.');
+    }
+
 
     // protected  function mutateFormDataBeforeSave(array $data): array
     // {

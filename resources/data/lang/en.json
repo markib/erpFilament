@@ -199,5 +199,10 @@
     "Unit": "Unit",
     "pages": "pages",
     "widgets": "widgets",
-    "custom": "custom"
+    "custom": "custom",
+    "Product Code": "Product Code",
+    "Product Price": "Product Price",
+    "Stock Alert": "Stock Alert",
+    "Product Stock Alert": "Product Stock Alert",
+    "Category": "Category"
 }
