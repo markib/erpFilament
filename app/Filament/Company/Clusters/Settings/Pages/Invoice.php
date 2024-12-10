@@ -50,7 +50,7 @@ class Invoice extends Page
 
     protected static ?string $cluster = Settings::class;
 
-    protected static bool $shouldRegisterNavigation = false;
+    // protected static bool $shouldRegisterNavigation = false;
 
     public ?array $data = [];
 

@@ -48,6 +48,43 @@ class CurrencyConverter
 
         return money($amount, $currency)->format();
     }
+    public static function convertCentsToFloat(int $amount, ?string $currency = null): float
+    {
+        $currency ??= CurrencyAccessor::getDefaultCurrency();
+
+        return money($amount, $currency)->getValue();
+    }
+
+    public static function convertCentsToFormatSimple(int $amount, ?string $currency = null): string
+    {
+        $currency ??= CurrencyAccessor::getDefaultCurrency();
+
+        return money($amount, $currency)->formatSimple();
+    }
+
+    public static function isValidAmount(?string $amount, ?string $currency = null): bool
+    {
+        $currency ??= CurrencyAccessor::getDefaultCurrency();
+
+        if (blank($amount)) {
+            return false;
+        }
+
+        try {
+            money($amount, $currency);
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static function formatToMoney(string | float $amount, ?string $currency = null): string
+    {
+        $currency ??= CurrencyAccessor::getDefaultCurrency();
+
+        return money($amount, $currency, true)->format();
+    }
 
     public static function handleCurrencyChange(Set $set, $state): void
     {

@@ -19,6 +19,8 @@ class ReplicateBulkAction extends BulkAction implements ReplicatesRecords
     protected ?Closure $afterReplicaSaved = null;
 
     protected array $relationshipsToReplicate = [];
+    
+    protected array | Closure | null $excludedAttributesPerRelationship = null;
 
     public static function getDefaultName(): ?string
     {
@@ -95,6 +97,18 @@ class ReplicateBulkAction extends BulkAction implements ReplicatesRecords
         $this->relationshipsToReplicate = $relationships;
 
         return $this;
+    }
+
+    public function withExcludedRelationshipAttributes(string $relationship, array | Closure | null $attributes): static
+    {
+        $this->excludedAttributesPerRelationship[$relationship] = $attributes;
+
+        return $this;
+    }
+
+    public function getExcludedRelationshipAttributes(): ?array
+    {
+        return $this->evaluate($this->excludedAttributesPerRelationship);
     }
 
     public function afterReplicaSaved(Closure $callback): static

@@ -30,6 +30,7 @@ use App\Filament\Company\Resources\CategoryResource;
 use App\Filament\Company\Resources\Core\DepartmentResource;
 use App\Filament\Company\Resources\CustomerResource;
 use App\Filament\Company\Resources\ProductResource;
+use App\Filament\Company\Resources\Sales\InvoiceResource;
 use App\Filament\Company\Resources\SupplierResource;
 use App\Filament\Components\PanelShiftDropdown;
 use App\Filament\User\Clusters\Account;
@@ -71,7 +72,7 @@ use Wallo\FilamentCompanies\Enums\Provider;
 use Wallo\FilamentCompanies\FilamentCompanies;
 use Wallo\FilamentCompanies\Pages\Auth\Login;
 use Wallo\FilamentCompanies\Pages\Auth\Register;
-use Wallo\FilamentCompanies\Pages\User\Profile;
+use App\Filament\Company\Resources\Common\OfferingResource;
 
 class FilamentCompaniesServiceProvider extends PanelProvider
 {
@@ -141,7 +142,7 @@ class FilamentCompaniesServiceProvider extends PanelProvider
                         ...Dashboard::getNavigationItems(),
                         ...Reports::getNavigationItems(),
                         ...Settings::getNavigationItems(),
-
+                        ...OfferingResource::getNavigationItems(),
                     ])
                     ->groups([
                         NavigationGroup::make('Accounting')
@@ -159,6 +160,13 @@ class FilamentCompaniesServiceProvider extends PanelProvider
                         NavigationGroup::make('HR')
                             ->icon('heroicon-o-user-group')
                             ->items(DepartmentResource::getNavigationItems()),
+                NavigationGroup::make('Sales')
+                    ->label('Sales')
+                    ->icon('heroicon-o-currency-dollar')
+                    ->items([
+                        ...InvoiceResource::getNavigationItems(),
+                      
+                    ]),
                         NavigationGroup::make('Manage Products')
 
                             ->localizeLabel()

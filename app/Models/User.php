@@ -125,8 +125,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
         return $this->belongsToMany(Role::class, 'role_user'); // Adjust pivot table name if different
     }
 
-    public function currentCompany(): BelongsTo
-    {
-        return $this->belongsTo(Company::class); // Assuming a user belongs to a company
-    }
+    // public function currentCompany(): BelongsTo
+    // {
+    //     return $this->belongsTo(Company::class); // Assuming a user belongs to a company
+    // }
 }

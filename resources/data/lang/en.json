@@ -209,5 +209,10 @@
     "Updated At": "Updated At",
     "Parties": "Parties",
     "Customer": "Customer",
-    "Supplier": "Supplier"
+    "Supplier": "Supplier",
+    "Invoice Header": "Invoice Header",
+    "Invoice Details": "Invoice Details",
+    "Invoice Footer": "Invoice Footer",
+    "Sale Information": "Sale Information",
+    "Purchase Information": "Purchase Information"
 }
