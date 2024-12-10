@@ -32,6 +32,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 use function Filament\authorize;
@@ -48,6 +49,8 @@ class Invoice extends Page
     protected static string $view = 'filament.company.pages.setting.invoice';
 
     protected static ?string $cluster = Settings::class;
+
+    protected static bool $shouldRegisterNavigation = false;
 
     public ?array $data = [];
 
@@ -92,11 +95,17 @@ class Invoice extends Page
     {
         try {
             $data = $this->form->getState();
+            Log::debug('Form data before save:', $data);
 
             $this->handleRecordUpdate($this->record, $data);
 
+            Log::debug('Record updated successfully:', $this->record->toArray());
         } catch (Halt $exception) {
+            Log::error('Save halted:', ['exception' => $exception]);
             return;
+        } catch (\Exception $exception) {
+            Log::error('Error during save:', ['exception' => $exception]);
+            throw $exception;
         }
 
         $this->getSavedNotification()->send();
@@ -225,6 +234,7 @@ class Invoice extends Page
                             ->localizeLabel('Item Name')
                             ->options(InvoiceModel::getAvailableItemNameOptions())
                             ->afterStateUpdated(static function (Get $get, Set $set, $state, $old) {
+                    
                                 if ($state !== 'other' && $old === 'other' && filled($get('item_name.custom'))) {
                                     $set('item_name.old_custom', $get('item_name.custom'));
                                     $set('item_name.custom', null);
@@ -317,7 +327,6 @@ class Invoice extends Page
     protected function handleRecordUpdate(InvoiceModel $record, array $data): InvoiceModel
     {
         $record->update($data);
-
         return $record;
     }
 

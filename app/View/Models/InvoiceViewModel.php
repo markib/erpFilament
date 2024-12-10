@@ -14,7 +14,9 @@ class InvoiceViewModel
     public function __construct(
         public DocumentDefault $invoice,
         public ?array $data = null
-    ) {}
+    ) {
+        
+    }
 
     public function logo(): ?string
     {
@@ -29,7 +31,12 @@ class InvoiceViewModel
     // Company related methods
     public function company_name(): string
     {
-        return $this->invoice->company->name;
+        if (!$this->invoice->company) {
+            \Log::warning('Company not found for invoice.', ['invoice_id' => $this->invoice->id]);
+            return 'No Company Name';
+        }
+
+        return $this->invoice->company->name ?? 'No Company Name';
     }
 
     public function company_address(): ?string
@@ -75,6 +82,7 @@ class InvoiceViewModel
 
     public function number_next(): string
     {
+        
         return $this->data['number_next'] ?? $this->invoice->number_next;
     }
 
@@ -86,7 +94,8 @@ class InvoiceViewModel
     // Invoice date related methods
     public function invoice_date(): string
     {
-        return $this->invoice->company->locale->date_format->getLabel();
+        // return $this->invoice->company->locale->date_format->getLabel();
+        return $this->invoice?->company?->locale?->date_format?->getLabel() ?? 'No Date Format Available';
     }
 
     public function payment_terms(): string
@@ -96,7 +105,20 @@ class InvoiceViewModel
 
     public function invoice_due_date(): string
     {
-        $dateFormat = $this->invoice->company->locale->date_format->value;
+        
+        $company = $this->invoice?->company;
+        if (!$company || !$company->locale || !$company->locale->date_format) {
+            \Log::warning('Missing related data for invoice due date.', [
+                'invoice' => $this->invoice,
+                'company' => $company,
+                'locale' => $company?->locale,
+                'date_format' => $company?->locale?->date_format,
+            ]);
+
+            return 'Unknown Due Date';
+        }
+
+        $dateFormat = $company->locale->date_format->value;
 
         return PaymentTerms::from($this->payment_terms())->getDueDate($dateFormat);
     }

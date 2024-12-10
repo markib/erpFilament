@@ -28,9 +28,12 @@ use App\Filament\Company\Pages\Service\LiveCurrency;
 use App\Filament\Company\Resources\Banking\AccountResource;
 use App\Filament\Company\Resources\CategoryResource;
 use App\Filament\Company\Resources\Core\DepartmentResource;
+use App\Filament\Company\Resources\CustomerResource;
 use App\Filament\Company\Resources\ProductResource;
+use App\Filament\Company\Resources\SupplierResource;
 use App\Filament\Components\PanelShiftDropdown;
 use App\Filament\User\Clusters\Account;
+use App\Filament\User\Clusters\Account\Pages\Profile as PagesProfile;
 use App\Http\Middleware\ConfigureCurrentCompany;
 use App\Livewire\UpdatePassword;
 use App\Livewire\UpdateProfileInformation;
@@ -68,8 +71,7 @@ use Wallo\FilamentCompanies\Enums\Provider;
 use Wallo\FilamentCompanies\FilamentCompanies;
 use Wallo\FilamentCompanies\Pages\Auth\Login;
 use Wallo\FilamentCompanies\Pages\Auth\Register;
-
-
+use Wallo\FilamentCompanies\Pages\User\Profile;
 
 class FilamentCompaniesServiceProvider extends PanelProvider
 {
@@ -78,7 +80,7 @@ class FilamentCompaniesServiceProvider extends PanelProvider
      */
     public function panel(Panel $panel): Panel
     {
-        
+
         return $panel
             ->default()
             ->id('company')
@@ -116,7 +118,7 @@ class FilamentCompaniesServiceProvider extends PanelProvider
                         return $builder
                             ->items(Account::getNavigationItems());
                     }),
-            FilamentShieldPlugin::make(),
+                FilamentShieldPlugin::make(),
             )
             ->colors([
                 'primary' => Color::Indigo,
@@ -125,11 +127,15 @@ class FilamentCompaniesServiceProvider extends PanelProvider
             // ->userMenuItems([
             //     'profile' => MenuItem::make()
             //         ->label('Profile')
-            //         ->icon('heroicon-o-user-circle')
-            //         ->url(static fn() => url(Profile::getUrl())),
+            //         ->icon('heroicon-o-user-circle'),
+            //         // ->url(static fn() => url(Profile::getUrl())),
+            //     MenuItem::make()
+            //         ->label('Company')
+            //         ->icon('heroicon-o-building-office')
+            //         ->url(static fn() => url(Pages\Dashboard::getUrl(panel: 'company', tenant: Auth::user()->personalCompany()))),
             // ])
             ->navigation(function (NavigationBuilder $builder): NavigationBuilder {
-           
+
                 return $builder
                     ->items([
                         ...Dashboard::getNavigationItems(),
@@ -153,36 +159,36 @@ class FilamentCompaniesServiceProvider extends PanelProvider
                         NavigationGroup::make('HR')
                             ->icon('heroicon-o-user-group')
                             ->items(DepartmentResource::getNavigationItems()),
-                NavigationGroup::make('Manage Products')
+                        NavigationGroup::make('Manage Products')
 
-                    ->localizeLabel()
+                            ->localizeLabel()
 
-                    ->icon('heroicon-o-rectangle-stack')
+                            ->icon('heroicon-o-rectangle-stack')
 
-                    ->items([
+                            ->items([
 
-                        // Only define items that should be visible based on their authorization logic
+                                // Only define items that should be visible based on their authorization logic
 
-                        NavigationItem::make('Categories')
+                                NavigationItem::make('Categories')
 
-                    ->url(route(
-                        'filament.company.resources.categories.index',
-                        ['tenant' => auth()->user()->currentCompany->id]
-                    ))
+                                    ->url(route(
+                                        'filament.company.resources.categories.index',
+                                        ['tenant' => auth()->user()->currentCompany->id]
+                                    ))
 
-                            ->visible(fn() => auth()->user()->hasRole('admin') ), // Visible to admin and product manager
+                                    ->visible(fn() => auth()->user()->hasRole('admin')), // Visible to admin and product manager
 
-                        NavigationItem::make('Products')
-                    ->url(route(
-                        'filament.company.resources.products.index',
-                        ['tenant' => auth()->user()->currentCompany->id]
-                    ))
+                                NavigationItem::make('Products')
+                                    ->url(route(
+                                        'filament.company.resources.products.index',
+                                        ['tenant' => auth()->user()->currentCompany->id]
+                                    ))
 
-                            ->visible(fn() => auth()->user()->hasRole('admin') ), // Same visibility
+                                    ->visible(fn() => auth()->user()->hasRole('admin')), // Same visibility
 
-                    ]),
+                            ]),
 
-                  
+
 
 
                         NavigationGroup::make('Services')
@@ -193,25 +199,33 @@ class FilamentCompaniesServiceProvider extends PanelProvider
                                 ...LiveCurrency::getNavigationItems(),
                             ]),
 
-                NavigationGroup::make('Roles & Permissions') // Parent Group Menu
-                ->icon('heroicon-o-lock-closed') // Add an icon for the group
-                ->items([ // Define the items within the group
-                    NavigationItem::make('List Roles')
-                    ->url(route('filament.company.resources.shield.roles.index', [
-                        'tenant' => auth()->user()->currentCompany->id ?? 1,
-                    ])),
-                        // ->icon('heroicon-o-list-bullet'),
+                        NavigationGroup::make('Roles & Permissions') // Parent Group Menu
+                            ->icon('heroicon-o-lock-closed') // Add an icon for the group
+                            ->items([ // Define the items within the group
+                                NavigationItem::make('List Roles')
+                                    ->url(route('filament.company.resources.shield.roles.index', [
+                                        'tenant' => auth()->user()->currentCompany->id ?? 1,
+                                    ])),
+                                // ->icon('heroicon-o-list-bullet'),
 
-                    NavigationItem::make('Create Role')
-                    ->url(route('filament.company.resources.shield.roles.create', [
-                        'tenant' => auth()->user()->currentCompany->id ?? 1,
-                    ])),
-                        // ->icon('heroicon-o-plus'),
-                ])
-                    ]);
+                                NavigationItem::make('Create Role')
+                                    ->url(route('filament.company.resources.shield.roles.create', [
+                                        'tenant' => auth()->user()->currentCompany->id ?? 1,
+                                    ])),
+                                // ->icon('heroicon-o-plus'),
+                                ]),
+                NavigationGroup::make('Parties')
+                    ->localizeLabel()
+                    ->icon('heroicon-o-clipboard-document-list')
+                    ->extraSidebarAttributes(['class' => 'es-sidebar-group'])
+                    ->items([
+                        ...CustomerResource::getNavigationItems(),
+                        ...SupplierResource::getNavigationItems(),
+                    ]),
+                           ]);
             })
             ->viteTheme('resources/css/filament/company/theme.css')
-            ->brandLogo(static fn () => view('components.icons.logo'))
+            ->brandLogo(static fn() => view('components.icons.logo'))
             ->tenant(Company::class, ownershipRelationship: 'company')
             ->tenantProfile(ManageCompany::class)
             ->tenantRegistration(CreateCompany::class)
@@ -226,7 +240,7 @@ class FilamentCompaniesServiceProvider extends PanelProvider
             ->widgets([
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
-                
+
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -241,9 +255,10 @@ class FilamentCompaniesServiceProvider extends PanelProvider
             ])
             ->tenantMiddleware([
                 ConfigureCurrentCompany::class,
-            \BezhanSalleh\FilamentShield\Middleware\SyncShieldTenant::class,
+                \BezhanSalleh\FilamentShield\Middleware\SyncShieldTenant::class,
             ], isPersistent: true)
-            ->plugins([FilamentShieldPlugin::make(),
+            ->plugins([
+                FilamentShieldPlugin::make(),
             ])
             ->authMiddleware([
                 Authenticate::class,
@@ -257,7 +272,7 @@ class FilamentCompaniesServiceProvider extends PanelProvider
     {
         $this->configurePermissions();
         $this->configureDefaults();
-        
+
 
         FilamentCompanies::createUsersUsing(CreateNewUser::class);
         FilamentCompanies::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
@@ -285,7 +300,7 @@ class FilamentCompaniesServiceProvider extends PanelProvider
         //     ->plugins([
         //         FilamentShieldPlugin::make(),
         //     ]);
-    
+
     }
 
     /**
@@ -320,10 +335,10 @@ class FilamentCompaniesServiceProvider extends PanelProvider
     {
         $this->configureSelect();
 
-        Actions\CreateAction::configureUsing(static fn (Actions\CreateAction $action) => FilamentComponentConfigurator::configureActionModals($action));
-        Actions\EditAction::configureUsing(static fn (Actions\EditAction $action) => FilamentComponentConfigurator::configureActionModals($action));
-        Tables\Actions\EditAction::configureUsing(static fn (Tables\Actions\EditAction $action) => FilamentComponentConfigurator::configureActionModals($action));
-        Tables\Actions\CreateAction::configureUsing(static fn (Tables\Actions\CreateAction $action) => FilamentComponentConfigurator::configureActionModals($action));
+        Actions\CreateAction::configureUsing(static fn(Actions\CreateAction $action) => FilamentComponentConfigurator::configureActionModals($action));
+        Actions\EditAction::configureUsing(static fn(Actions\EditAction $action) => FilamentComponentConfigurator::configureActionModals($action));
+        Tables\Actions\EditAction::configureUsing(static fn(Tables\Actions\EditAction $action) => FilamentComponentConfigurator::configureActionModals($action));
+        Tables\Actions\CreateAction::configureUsing(static fn(Tables\Actions\CreateAction $action) => FilamentComponentConfigurator::configureActionModals($action));
         Forms\Components\DateTimePicker::configureUsing(static function (Forms\Components\DateTimePicker $component) {
             $component->native(false);
         });
@@ -335,7 +350,7 @@ class FilamentCompaniesServiceProvider extends PanelProvider
     protected function configureSelect(): void
     {
         Select::configureUsing(function (Select $select): void {
-            $isSelectable = fn (): bool => ! $this->hasRequiredRule($select);
+            $isSelectable = fn(): bool => ! $this->hasRequiredRule($select);
 
             $select
                 ->native(false)
@@ -349,6 +364,4 @@ class FilamentCompaniesServiceProvider extends PanelProvider
 
         return in_array('required', $rules, true);
     }
-
-  
 }

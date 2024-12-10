@@ -8,6 +8,8 @@ use App\Models\Banking\BankAccount;
 use App\Models\Banking\ConnectedBankAccount;
 use App\Models\Common\Contact;
 use App\Models\Core\Department;
+use App\Models\Parties\Customer;
+use App\Models\Parties\Supplier;
 use App\Models\Product\Product;
 use App\Models\Setting\Appearance;
 use App\Models\Setting\CompanyDefault;
@@ -154,8 +156,23 @@ class Company extends FilamentCompaniesCompany implements HasAvatar
         return $this->hasMany(Product::class);
     }
 
+    public function customers(): HasMany
+    {
+        return $this->hasMany(Customer::class);
+    }
+
+    public function suppliers(): HasMany
+    {
+        return $this->hasMany(Supplier::class);
+    }
+
     public function units(): HasMany
     {
         return $this->hasMany(Unit::class);
+    }
+
+    public function DocumentDefaults(): HasOne
+    {
+        return $this->HasOne(DocumentDefault::class);
     }
 }

@@ -1,5 +1,6 @@
 @php
 $modals = \Wallo\FilamentCompanies\FilamentCompanies::getModals();
+$roles = \App\Models\Role::all();
 @endphp
 
 <div>

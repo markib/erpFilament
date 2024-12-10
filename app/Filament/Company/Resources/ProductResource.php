@@ -13,6 +13,7 @@ use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\Alignment;
 use Filament\Tables;
 use Filament\Tables\Actions\Action as ActionsAction;
 use Filament\Tables\Columns\IconColumn;
@@ -106,7 +107,22 @@ class ProductResource extends Resource
                 ->onColor('success')
                 ->offColor('danger')
                 ->inline(false),
-                // ->default(true),
+            // ->default(true),
+            Forms\Components\Group::make([
+                    Forms\Components\DatePicker::make('created_at')
+                        ->label('Created At')
+                        ->disabled()
+                        ->visible(fn(Forms\Get $get): bool => filled($get('created_at')))
+                        ->displayFormat('d-m-Y H:i:s'),
+                        
+                    Forms\Components\DatePicker::make('updated_at')
+                        ->label('Updated At')
+                        ->disabled()
+                        ->visible(fn(Forms\Get $get): bool => filled($get('updated_at')))
+                        ->displayFormat('d-m-Y H:i:s')
+                        
+            ])->columnSpan(1),
+
             ]);
     }
 
@@ -137,7 +153,7 @@ class ProductResource extends Resource
             Tables\Columns\TextColumn::make('product_price')
             ->localizeLabel()
             ->label('Price')
-            
+            ->money()
                 ->weight('semibold')
                 ->searchable()
                 ->sortable(),
@@ -145,7 +161,20 @@ class ProductResource extends Resource
             ->localizeLabel()
             ->label('Stock Alert')
                 ->weight('semibold')
+                ->alignment(Alignment::Center)
                 ->sortable(),
+            Tables\Columns\TextColumn::make('created_at')
+            ->localizeLabel()
+            ->label('Created At')
+                ->weight('semibold')
+                ->sortable()
+                ->toggleable(),
+            Tables\Columns\TextColumn::make('updated_at')
+            ->localizeLabel()
+            ->label('Updated At')
+                ->weight('semibold')
+                ->sortable()
+                ->toggleable(),
             Tables\Columns\IconColumn::make('enabled')
     ->label('Status')
     
@@ -154,7 +183,8 @@ class ProductResource extends Resource
     ->color(fn($state) => $state ? 'success' : 'danger') // Change color based on state
     // ->tooltip(fn($state) => $state ? 'Click to disable' : 'Click to enable') // Tooltip for clarity
             ])
-          
+
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 //
             ])

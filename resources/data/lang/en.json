@@ -204,5 +204,10 @@
     "Product Price": "Product Price",
     "Stock Alert": "Stock Alert",
     "Product Stock Alert": "Product Stock Alert",
-    "Category": "Category"
+    "Category": "Category",
+    "Created At": "Created At",
+    "Updated At": "Updated At",
+    "Parties": "Parties",
+    "Customer": "Customer",
+    "Supplier": "Supplier"
 }
